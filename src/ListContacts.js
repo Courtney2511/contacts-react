@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import escapeRegExp from 'escape-string-regexp'
+import sortBy from 'sort-by'
 
 // 1. The user enters text into the input field.
 // 2. An event listener invokes the updateQuery() function on every onChange event.
@@ -22,9 +24,22 @@ class ListContacts extends Component {
   }
 
   render() {
+
+    let showingContacts
+    if (this.state.query) {
+      // escape special characters and ignore case
+      const match = new RegExp(escapeRegExp(this.state.query, 'i'))
+      // filter the contacts array for contacts that 'match' the input
+      showingContacts = this.props.contacts.filter((contact) => match.test(contact.name))
+    } else {
+      showingContacts = this.props.contacts
+    }
+
+    // sort showingContacts with sortBy helper
+    showingContacts.sort(sortBy('name'))
+
     return (
       <div className='list-contacts'>
-        {JSON.stringify(this.state)}
         <div className='list-contacts-top'>
           <input
             className='search-contacts'
@@ -35,7 +50,7 @@ class ListContacts extends Component {
             ></input>
         </div>
         <ol className='contact-list'>
-          {this.props.contacts.map( (contact) =>
+          {showingContacts.map( (contact) =>
             <li key={contact.id} className='contact-list-item'>
               <div className='contact-avatar' style={{
                   backgroundImage: `url(${contact.avatarURL})`
